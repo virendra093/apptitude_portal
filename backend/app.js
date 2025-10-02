@@ -1,40 +1,42 @@
-const express = require('express');
-const session = require('express-session');
-const bodyParser = require('body-parser');
-const path = require('path');
-const bcrypt = require('bcrypt');
-const db = require('./config/db.js');
+const express = require("express");
+const session = require("express-session");
+const bodyParser = require("body-parser");
+const path = require("path");
+const bcrypt = require("bcryptjs");
+const db = require("./config/db.js");
 
-const authRoutes = require('./routes/auth');
-const testRoutes = require('./routes/test');
-const resultRoutes = require('./routes/result');
-const performanceRoutes = require('./routes/performance');
-const adminRoutes = require('./routes/admin');
-const timingRoutes = require('./routes/timingRoutes');
-const contactRoutes = require('./routes/contact');
+const authRoutes = require("./routes/auth");
+const testRoutes = require("./routes/test");
+const resultRoutes = require("./routes/result");
+const performanceRoutes = require("./routes/performance");
+const adminRoutes = require("./routes/admin");
+const timingRoutes = require("./routes/timingRoutes");
+const contactRoutes = require("./routes/contact");
 
 const app = express();
 
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend/public')));
-app.use(session({
-  secret: 'your_secret_key',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: false, // Set to true if using HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+app.use(express.static(path.join(__dirname, "../frontend/public")));
+app.use(
+  session({
+    secret: "your_secret_key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: false, // Set to true if using HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
   if (req.session.user) {
     return next();
   }
-  res.redirect('/auth/login');
+  res.redirect("/auth/login");
 };
 
 // Middleware to check if user is admin
@@ -42,103 +44,107 @@ const isAdmin = (req, res, next) => {
   if (req.session.admin) {
     return next();
   }
-  res.redirect('/admin/login');
+  res.redirect("/admin/login");
 };
 
 // Routes
-app.use('/auth', authRoutes);
-app.use('/test', isAuthenticated, testRoutes);
-app.use('/result', isAuthenticated, resultRoutes);
-app.use('/performance', isAuthenticated, performanceRoutes);
-app.use('/admin', adminRoutes);
-app.use('/api', timingRoutes);
-app.use('/', contactRoutes);
+app.use("/auth", authRoutes);
+app.use("/test", isAuthenticated, testRoutes);
+app.use("/result", isAuthenticated, resultRoutes);
+app.use("/performance", isAuthenticated, performanceRoutes);
+app.use("/admin", adminRoutes);
+app.use("/api", timingRoutes);
+app.use("/", contactRoutes);
 
 // Serve the home page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/views', 'home.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/views", "home.html"));
 });
 
 // Auth routes are handled by authRoutes middleware
 
 // Serve the timing analysis dashboard (admin only)
-app.get('/admin/timing-analysis', isAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/views', 'timing-analysis.html'));
+app.get("/admin/timing-analysis", isAdmin, (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "../frontend/views", "timing-analysis.html")
+  );
 });
 
 // Serve the suspicious analysis page (admin only)
-app.get('/admin/suspicious-analysis', isAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/views', 'suspicious-analysis.html'));
+app.get("/admin/suspicious-analysis", isAdmin, (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "../frontend/views", "suspicious-analysis.html")
+  );
 });
 
 // Handle login
-app.post('/auth/login', async (req, res) => {
+app.post("/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     // Query the database for the user
-    const query = 'SELECT * FROM users WHERE username = ?';
+    const query = "SELECT * FROM users WHERE username = ?";
     db.query(query, [username], async (err, results) => {
       if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'An error occurred during login. Please try again.' 
+        console.error("Database error:", err);
+        return res.status(500).json({
+          success: false,
+          message: "An error occurred during login. Please try again.",
         });
       }
 
       if (results.length === 0) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Invalid username or password' 
+        return res.status(401).json({
+          success: false,
+          message: "Invalid username or password",
         });
       }
 
       const user = results[0];
-      
+
       // Compare the provided password with the stored hash
       const passwordMatch = await bcrypt.compare(password, user.password);
-      
+
       if (!passwordMatch) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Invalid username or password' 
+        return res.status(401).json({
+          success: false,
+          message: "Invalid username or password",
         });
       }
 
       // Set user session
-      req.session.user = { 
+      req.session.user = {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
       };
 
-      res.json({ 
-        success: true, 
-        redirect: '/test',
+      res.json({
+        success: true,
+        redirect: "/test",
         user: {
           username: user.username,
-          email: user.email
-        }
+          email: user.email,
+        },
       });
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'An error occurred during login. Please try again.' 
+    console.error("Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred during login. Please try again.",
     });
   }
 });
 
 // Handle logout
-app.get('/auth/logout', (req, res) => {
+app.get("/auth/logout", (req, res) => {
   req.session.destroy();
-  res.redirect('/');
+  res.redirect("/");
 });
 
 // Get user session info
-app.get('/api/user', (req, res) => {
+app.get("/api/user", (req, res) => {
   if (req.session.user) {
     res.json({ isLoggedIn: true, user: req.session.user });
   } else {
