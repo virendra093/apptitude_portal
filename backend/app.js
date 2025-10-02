@@ -1,5 +1,7 @@
 const express = require("express");
 const session = require("express-session");
+const MySQLStore = require("express-mysql-session")(session);
+const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const path = require("path");
 const bcrypt = require("bcryptjs");
@@ -15,15 +17,28 @@ const contactRoutes = require("./routes/contact");
 
 const app = express();
 
+const sessionStore = new MySQLStore(
+  {
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASS || "Viru@245771",
+    database: process.env.DB_NAME || "apptitude_portal",
+    port: 4000,
+    createDatabaseTable: true, // auto create the 'sessions' table if not exists
+  },
+  db.promise().pool // reuse the same db connection if you want
+);
+
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "../frontend/public")));
 app.use(
   session({
-    secret: "your_secret_key",
+    secret: "asdfghjkl1234567890",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: sessionStore,
     cookie: {
       secure: false, // Set to true if using HTTPS
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
