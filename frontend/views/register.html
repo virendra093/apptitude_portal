@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div class="register-container">
+      <h2>Create Account</h2>
+      <div id="errorMessage" class="error-message" style="display: none"></div>
+      <div
+        id="successMessage"
+        class="success-message"
+        style="display: none"
+      ></div>
+      <form id="registerForm" action="/auth/register" method="post">
+        <div class="form-group">
+          <input type="text" name="username" placeholder="Username" required />
+        </div>
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Email" required />
+        </div>
+        <div class="form-group">
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            required
+          />
+        </div>
+        <button type="submit">Register</button>
+      </form>
+      <div class="login-link">
+        <p>Already have an account? <a href="/auth/login">Login</a></p>
+      </div>
+    </div>
+
+    <script>
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+      const registerForm = document.getElementById("registerForm");
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+        successMessage.style.display = "none";
+      }
+
+      function showSuccess(message) {
+        successMessage.textContent = message;
+        successMessage.style.display = "block";
+        errorMessage.style.display = "none";
+      }
+
+      function hideMessages() {
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+      }
+
+      registerForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        hideMessages();
+
+        const formData = new FormData(this);
+        const password = formData.get("password");
+        const confirmPassword = formData.get("confirmPassword");
+
+        if (password !== confirmPassword) {
+          showError("Passwords do not match");
+          return;
+        }
+
+        try {
+          const response = await fetch("/auth/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: formData.get("username"),
+              email: formData.get("email"),
+              password: password,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showSuccess("Registration successful! Redirecting to login...");
+            setTimeout(() => {
+              window.location.href = "/auth/login";
+            }, 2000);
+          } else {
+            showError(data.message || "Registration failed. Please try again.");
+          }
+        } catch (error) {
+          console.error("Error during registration:", error);
+          showError("An error occurred during registration. Please try again.");
+        }
+      });
+    </script>
+  </body>
+</html>

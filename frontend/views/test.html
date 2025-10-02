@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="/js/timing-analysis.js"></script>
+    <script>
+      let startTime;
+      let currentQuestion = null;
+
+      async function loadQuestion() {
+        try {
+          const res = await fetch("/test/question");
+          const data = await res.json();
+
+          if (data.completed) {
+            // Show completion screen with score
+            showCompletionScreen(data);
+            return;
+          }
+
+          currentQuestion = data;
+          document.getElementById("question").innerText = data.question_text;
+          document.getElementById("question_id").value = data.id;
+
+          // Update radio button labels with options
+          document.getElementById("labelA").innerText = data.option_a;
+          document.getElementById("labelB").innerText = data.option_b;
+          document.getElementById("labelC").innerText = data.option_c;
+          document.getElementById("labelD").innerText = data.option_d;
+
+          // Clear selected option
+          document
+            .querySelectorAll('input[name="option"]')
+            .forEach((opt) => (opt.checked = false));
+          document
+            .querySelectorAll(".option")
+            .forEach((opt) => opt.classList.remove("selected"));
+
+          // Show question container and hide completion screen
+          document.querySelector(".question-container").style.display = "block";
+          document.querySelector(".completion-screen").style.display = "none";
+
+          startTime = Date.now();
+
+          // Initialize timing analysis
+          if (window.timingAnalysis) {
+            window.timingAnalysis.initQuestionTiming(data.id, data.ideal_time);
+          }
+        } catch (error) {
+          console.error("Error loading question:", error);
+          showError("Failed to load question. Please try again.");
+        }
+      }
+
+      function showCompletionScreen(data) {
+        // Hide question container and show completion screen
+        document.querySelector(".question-container").style.display = "none";
+        document.querySelector(".completion-screen").style.display = "block";
+
+        // Update completion screen with score
+        document.getElementById("totalQuestions").textContent =
+          data.total_questions;
+        document.getElementById("correctAnswers").textContent =
+          data.correct_answers;
+        document.getElementById("score").textContent = data.score.toFixed(1);
+      }
+
+      async function submitAnswer() {
+        const selectedOption = document.querySelector(
+          'input[name="option"]:checked'
+        );
+
+        if (!selectedOption) {
+          showError("Please select an answer");
+          return;
+        }
+
+        const questionId = document.getElementById("question_id").value;
+        const timeTaken = Math.round((Date.now() - startTime) / 1000);
+
+        try {
+          // Submit timing data if available
+          if (window.timingAnalysis) {
+            await window.timingAnalysis.submitQuestionTiming(
+              currentQuestion.student_id
+            );
+          }
+
+          const res = await fetch("/test/submit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              question_id: questionId,
+              selected_option: selectedOption.value,
+              time_taken: timeTaken,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            if (data.next_question) {
+              // Load the next question
+              currentQuestion = data.next_question;
+              document.getElementById("question").innerText =
+                data.next_question.question_text;
+              document.getElementById("question_id").value =
+                data.next_question.id;
+
+              // Update radio button labels with options
+              document.getElementById("labelA").innerText =
+                data.next_question.option_a;
+              document.getElementById("labelB").innerText =
+                data.next_question.option_b;
+              document.getElementById("labelC").innerText =
+                data.next_question.option_c;
+              document.getElementById("labelD").innerText =
+                data.next_question.option_d;
+
+              // Clear selected option
+              document
+                .querySelectorAll('input[name="option"]')
+                .forEach((opt) => (opt.checked = false));
+              document
+                .querySelectorAll(".option")
+                .forEach((opt) => opt.classList.remove("selected"));
+
+              // Reset timer
+              startTime = Date.now();
+
+              // Initialize timing analysis for the next question
+              if (window.timingAnalysis) {
+                window.timingAnalysis.initQuestionTiming(
+                  data.next_question.id,
+                  data.next_question.ideal_time
+                );
+              }
+            } else {
+              // No more questions, show completion screen
+              showCompletionScreen({
+                completed: true,
+                total_questions: data.total_questions,
+                correct_answers: data.correct_answers,
+                score: data.score,
+              });
+            }
+          } else {
+            showError(data.error || "Failed to submit answer");
+          }
+        } catch (error) {
+          console.error("Error submitting answer:", error);
+          showError("Failed to submit answer. Please try again.");
+        }
+      }
+
+      function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+
+        setTimeout(() => {
+          errorMessage.style.display = "none";
+        }, 3000);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="test-container">
+      <div class="test-header">
+        <h2>Online Test</h2>
+      </div>
+
+      <div id="errorMessage" class="error-message" style="display: none"></div>
+
+      <div class="question-container">
+        <div class="question" id="question"></div>
+        <input type="hidden" id="question_id" />
+
+        <div class="options">
+          <div
+            class="option"
+            onclick="document.getElementById('optionA').click()"
+          >
+            <input type="radio" id="optionA" name="option" value="A" />
+            <label for="optionA" id="labelA">A</label>
+          </div>
+
+          <div
+            class="option"
+            onclick="document.getElementById('optionB').click()"
+          >
+            <input type="radio" id="optionB" name="option" value="B" />
+            <label for="optionB" id="labelB">B</label>
+          </div>
+
+          <div
+            class="option"
+            onclick="document.getElementById('optionC').click()"
+          >
+            <input type="radio" id="optionC" name="option" value="C" />
+            <label for="optionC" id="labelC">C</label>
+          </div>
+
+          <div
+            class="option"
+            onclick="document.getElementById('optionD').click()"
+          >
+            <input type="radio" id="optionD" name="option" value="D" />
+            <label for="optionD" id="labelD">D</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="completion-screen" style="display: none">
+        <h2>Test Completed!</h2>
+        <div class="completion-message">
+          <p>
+            Thank you for completing the test. Your results have been recorded.
+          </p>
+          <p>Please contact the administrator to view your results.</p>
+        </div>
+        <div class="completion-actions">
+          <a href="/" class="btn">Back to Home</a>
+        </div>
+      </div>
+
+      <div class="test-controls">
+        <button onclick="submitAnswer()">Submit Answer</button>
+      </div>
+    </div>
+
+    <script>
+      // Add event listeners to highlight selected options
+      document.querySelectorAll('input[name="option"]').forEach((option) => {
+        option.addEventListener("change", function () {
+          document
+            .querySelectorAll(".option")
+            .forEach((opt) => opt.classList.remove("selected"));
+          this.closest(".option").classList.add("selected");
+        });
+      });
+
+      // Load the first question when the page loads
+      window.onload = loadQuestion;
+    </script>
+  </body>
+</html>

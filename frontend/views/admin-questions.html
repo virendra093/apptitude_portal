@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Question Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .admin-dashboard {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-title {
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .questions-container {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .questions-list {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .question-form {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .option-label {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        
+        .question-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .question-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .question-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .question-options {
+            margin-top: 10px;
+        }
+        
+        .question-option {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        
+        .question-option.correct {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        
+        .question-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .filters {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-dashboard">
+        <div class="admin-header">
+            <h1 class="admin-title">Question Management</h1>
+            <div class="admin-actions">
+                <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('add')">Add Question</div>
+            <div class="tab" onclick="switchTab('list')">Question List</div>
+        </div>
+        
+        <div id="addTab" class="tab-content active">
+            <div class="question-form">
+                <h2>Add New Question</h2>
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="questionText">Question Text</label>
+                        <textarea id="questionText" class="form-control" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Options</label>
+                        <div class="options-container">
+                            <div class="option-group">
+                                <div class="option-label">A</div>
+                                <input type="text" id="optionA" class="form-control" placeholder="Option A" required>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-label">B</div>
+                                <input type="text" id="optionB" class="form-control" placeholder="Option B" required>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-label">C</div>
+                                <input type="text" id="optionC" class="form-control" placeholder="Option C" required>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-label">D</div>
+                                <input type="text" id="optionD" class="form-control" placeholder="Option D" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="correctOption">Correct Option</label>
+                        <select id="correctOption" class="form-control" required>
+                            <option value="">Select Correct Option</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="idealTime">Ideal Time (seconds)</label>
+                        <input type="number" id="idealTime" class="form-control" min="10" value="30" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input type="text" id="category" class="form-control" placeholder="e.g., Math, Science, History" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="difficultyLevel">Difficulty Level</label>
+                        <select id="difficultyLevel" class="form-control" required>
+                            <option value="1">Easy</option>
+                            <option value="2">Medium</option>
+                            <option value="3">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Add Question</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="listTab" class="tab-content">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Category:</label>
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Difficulty:</label>
+                    <select id="difficultyFilter">
+                        <option value="">All Difficulties</option>
+                        <option value="1">Easy</option>
+                        <option value="2">Medium</option>
+                        <option value="3">Hard</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+            
+            <div id="questionsList" class="questions-list">
+                <!-- Questions will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Question Modal -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Question</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editQuestionForm">
+                    <input type="hidden" id="editQuestionId">
+                    <div class="form-group">
+                        <label for="editQuestionText">Question Text</label>
+                        <textarea id="editQuestionText" class="form-control" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Options</label>
+                        <div class="options-container">
+                            <div class="option-group">
+                                <div class="option-label">A</div>
+                                <input type="text" id="editOptionA" class="form-control" required>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-label">B</div>
+                                <input type="text" id="editOptionB" class="form-control" required>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-label">C</div>
+                                <input type="text" id="editOptionC" class="form-control" required>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-label">D</div>
+                                <input type="text" id="editOptionD" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editCorrectOption">Correct Option</label>
+                        <select id="editCorrectOption" class="form-control" required>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editIdealTime">Ideal Time (seconds)</label>
+                        <input type="number" id="editIdealTime" class="form-control" min="10" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editCategory">Category</label>
+                        <input type="text" id="editCategory" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editDifficultyLevel">Difficulty Level</label>
+                        <select id="editDifficultyLevel" class="form-control" required>
+                            <option value="1">Easy</option>
+                            <option value="2">Medium</option>
+                            <option value="3">Hard</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="updateQuestion()">Update</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Delete</h2>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this question? This action cannot be undone.</p>
+                <input type="hidden" id="deleteQuestionId">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteQuestion()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Check if admin is logged in
+        async function checkAdminLogin() {
+            try {
+                const response = await fetch('/admin/api/check');
+                const data = await response.json();
+                
+                if (!data.isLoggedIn) {
+                    window.location.href = '/admin/login';
+                }
+            } catch (error) {
+                console.error('Error checking admin login status:', error);
+                window.location.href = '/admin/login';
+            }
+        }
+        
+        // Load questions
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/admin/api/questions');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayQuestions(data.questions);
+                    updateCategoryFilter(data.questions);
+                } else {
+                    showAlert('Failed to load questions', 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                showAlert('Error loading questions', 'danger');
+            }
+        }
+        
+        // Display questions
+        function displayQuestions(questions) {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+            
+            if (questions.length === 0) {
+                questionsList.innerHTML = '<p>No questions found.</p>';
+                return;
+            }
+            
+            questions.forEach(question => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'question-item';
+                
+                const correctOption = question.correct_option;
+                const options = {
+                    A: question.option_a,
+                    B: question.option_b,
+                    C: question.option_c,
+                    D: question.option_d
+                };
+                
+                questionItem.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-title">${question.question_text}</div>
+                        <div class="question-meta">
+                            <span>Category: ${question.category}</span>
+                            <span>Difficulty: ${getDifficultyText(question.difficulty_level)}</span>
+                            <span>Time: ${question.ideal_time}s</span>
+                        </div>
+                    </div>
+                    <div class="question-options">
+                        <div class="question-option ${correctOption === 'A' ? 'correct' : ''}">A: ${options.A}</div>
+                        <div class="question-option ${correctOption === 'B' ? 'correct' : ''}">B: ${options.B}</div>
+                        <div class="question-option ${correctOption === 'C' ? 'correct' : ''}">C: ${options.C}</div>
+                        <div class="question-option ${correctOption === 'D' ? 'correct' : ''}">D: ${options.D}</div>
+                    </div>
+                    <div class="question-actions">
+                        <button class="btn btn-primary btn-sm" onclick="openEditModal(${question.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${question.id})">Delete</button>
+                    </div>
+                `;
+                
+                questionsList.appendChild(questionItem);
+            });
+        }
+        
+        // Update category filter
+        function updateCategoryFilter(questions) {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const categories = new Set();
+            
+            questions.forEach(question => {
+                categories.add(question.category);
+            });
+            
+            // Clear existing options except the first one
+            while (categoryFilter.options.length > 1) {
+                categoryFilter.remove(1);
+            }
+            
+            // Add new options
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+        
+        // Get difficulty text
+        function getDifficultyText(level) {
+            switch (level) {
+                case 1: return 'Easy';
+                case 2: return 'Medium';
+                case 3: return 'Hard';
+                default: return 'Unknown';
+            }
+        }
+        
+        // Apply filters
+        async function applyFilters() {
+            const category = document.getElementById('categoryFilter').value;
+            const difficulty = document.getElementById('difficultyFilter').value;
+            
+            try {
+                const response = await fetch(`/admin/api/questions?category=${category}&difficulty=${difficulty}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayQuestions(data.questions);
+                } else {
+                    showAlert('Failed to apply filters', 'danger');
+                }
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                showAlert('Error applying filters', 'danger');
+            }
+        }
+        
+        // Add question
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const questionData = {
+                question_text: document.getElementById('questionText').value,
+                option_a: document.getElementById('optionA').value,
+                option_b: document.getElementById('optionB').value,
+                option_c: document.getElementById('optionC').value,
+                option_d: document.getElementById('optionD').value,
+                correct_option: document.getElementById('correctOption').value,
+                ideal_time: parseInt(document.getElementById('idealTime').value),
+                category: document.getElementById('category').value,
+                difficulty_level: parseInt(document.getElementById('difficultyLevel').value)
+            };
+            
+            try {
+                const response = await fetch('/admin/api/questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(questionData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Question added successfully', 'success');
+                    document.getElementById('questionForm').reset();
+                    loadQuestions();
+                } else {
+                    showAlert(data.message || 'Failed to add question', 'danger');
+                }
+            } catch (error) {
+                console.error('Error adding question:', error);
+                showAlert('Error adding question', 'danger');
+            }
+        });
+        
+        // Open edit modal
+        async function openEditModal(questionId) {
+            try {
+                const response = await fetch(`/admin/api/questions/${questionId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const question = data.question;
+                    
+                    document.getElementById('editQuestionId').value = question.id;
+                    document.getElementById('editQuestionText').value = question.question_text;
+                    document.getElementById('editOptionA').value = question.option_a;
+                    document.getElementById('editOptionB').value = question.option_b;
+                    document.getElementById('editOptionC').value = question.option_c;
+                    document.getElementById('editOptionD').value = question.option_d;
+                    document.getElementById('editCorrectOption').value = question.correct_option;
+                    document.getElementById('editIdealTime').value = question.ideal_time;
+                    document.getElementById('editCategory').value = question.category;
+                    document.getElementById('editDifficultyLevel').value = question.difficulty_level;
+                    
+                    document.getElementById('editModal').style.display = 'flex';
+                } else {
+                    showAlert('Failed to load question details', 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading question details:', error);
+                showAlert('Error loading question details', 'danger');
+            }
+        }
+        
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        // Update question
+        async function updateQuestion() {
+            const questionId = document.getElementById('editQuestionId').value;
+            
+            const questionData = {
+                question_text: document.getElementById('editQuestionText').value,
+                option_a: document.getElementById('editOptionA').value,
+                option_b: document.getElementById('editOptionB').value,
+                option_c: document.getElementById('editOptionC').value,
+                option_d: document.getElementById('editOptionD').value,
+                correct_option: document.getElementById('editCorrectOption').value,
+                ideal_time: parseInt(document.getElementById('editIdealTime').value),
+                category: document.getElementById('editCategory').value,
+                difficulty_level: parseInt(document.getElementById('editDifficultyLevel').value)
+            };
+            
+            try {
+                const response = await fetch(`/admin/api/questions/${questionId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(questionData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Question updated successfully', 'success');
+                    closeEditModal();
+                    loadQuestions();
+                } else {
+                    showAlert(data.message || 'Failed to update question', 'danger');
+                }
+            } catch (error) {
+                console.error('Error updating question:', error);
+                showAlert('Error updating question', 'danger');
+            }
+        }
+        
+        // Open delete modal
+        function openDeleteModal(questionId) {
+            document.getElementById('deleteQuestionId').value = questionId;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+        
+        // Delete question
+        async function deleteQuestion() {
+            const questionId = document.getElementById('deleteQuestionId').value;
+            
+            try {
+                const response = await fetch(`/admin/api/questions/${questionId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Question deleted successfully', 'success');
+                    closeDeleteModal();
+                    loadQuestions();
+                } else {
+                    showAlert(data.message || 'Failed to delete question', 'danger');
+                }
+            } catch (error) {
+                console.error('Error deleting question:', error);
+                showAlert('Error deleting question', 'danger');
+            }
+        }
+        
+        // Switch tabs
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelector(`.tab:nth-child(${tabName === 'add' ? 1 : 2})`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            if (tabName === 'list') {
+                loadQuestions();
+            }
+        }
+        
+        // Show alert
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        // Logout
+        function logout() {
+            window.location.href = '/admin/logout';
+        }
+        
+        // Check admin login when page loads
+        checkAdminLogin();
+    </script>
+</body>
+</html> 

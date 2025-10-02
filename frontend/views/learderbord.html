@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Performance Leaderboard</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="leaderboard-container">
+      <div class="leaderboard-header">
+        <h2>Student Performance Leaderboard</h2>
+        <p>See how you compare with other students</p>
+      </div>
+
+      <div id="errorMessage" class="error-message" style="display: none"></div>
+
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Student ID</th>
+            <th>Total Questions</th>
+            <th>Correct Answers</th>
+            <th>Avg Time (s)</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+          <!-- Data rows inserted here dynamically -->
+        </tbody>
+      </table>
+
+      <div
+        class="test-controls"
+        style="margin-top: 30px; justify-content: center"
+      >
+        <a href="/" class="auth-btn login-btn">Back to Home</a>
+      </div>
+    </div>
+
+    <script>
+      async function fetchLeaderboard() {
+        try {
+          const response = await fetch("/performance"); // Your backend route
+          const data = await response.json();
+
+          const tbody = document.getElementById("leaderboard-body");
+          tbody.innerHTML = "";
+
+          data.forEach((row, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+            <td class="rank">${index + 1}</td>
+            <td>${row.student_id}</td>
+            <td>${row.total_questions}</td>
+            <td>${row.correct_answers}</td>
+            <td>${row.avg_time_deviation.toFixed(2)}</td>
+            <td class="score">${row.performance_score.toFixed(2)}</td>
+          `;
+            tbody.appendChild(tr);
+          });
+        } catch (error) {
+          console.error("Error fetching leaderboard:", error);
+          showError("Failed to load leaderboard data. Please try again later.");
+        }
+      }
+
+      function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+      }
+
+      window.onload = fetchLeaderboard;
+    </script>
+  </body>
+</html>

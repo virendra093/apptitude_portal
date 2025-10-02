@@ -1,0 +1,13 @@
+{
+  "name": "apptitude_portal_frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "echo 'Frontend is served by the backend server'",
+    "dev": "echo 'Frontend is served by the backend server'"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "Frontend for Aptitude Portal",
+  "dependencies": {}
+}

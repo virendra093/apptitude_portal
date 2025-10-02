@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to Our Platform</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            
+            <!-- Auth Buttons (shown when user is not logged in) -->
+            <div class="auth-buttons" id="authButtons">
+                <a href="/auth/login" class="auth-btn login-btn">Login</a>
+                <a href="/auth/register" class="auth-btn signup-btn">Sign Up</a>
+                <a href="/admin/login" class="auth-btn admin-btn">Admin Login</a>
+            </div>
+
+            <!-- User Profile (shown when user is logged in) -->
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <img src="/images/default-avatar.png" alt="User Avatar">
+                <span class="user-name" id="userName">User Name</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="section hero-section">
+        <div class="container">
+            <div class="section-content">
+                <div class="hero-text">
+                    <h1 class="main-title">Welcome to Our Platform</h1>
+                    <p class="hero-description">Discover the best solutions for your needs with our innovative platform. Experience excellence in every interaction.</p>
+                    <div class="hero-buttons">
+                        <a href="#features" class="primary-btn">Explore Features</a>
+                        <a href="#contact" class="secondary-btn">Get Started</a>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">10</span>
+                        <span class="stat-label">Active Users</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">85</span>
+                        <span class="stat-label">Success Rate</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Support</span>
+                    </div>
+                </div>
+                <div id="testButtonContainer" class="test-button-wrapper" style="display: none;">
+                    <a href="/test/start" class="primary-btn">Start Test</a>
+                </div>
+                <div id="loginPrompt" class="login-prompt">
+                    <p>Please login to take the test</p>
+                    <a href="/auth/login" class="secondary-btn">Login Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="hero-shape"></div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container">
+            <div class="section-content">
+                <h2>About Us</h2>
+                <p>We are dedicated to providing the best solutions for our customers. Our platform is designed to make your life easier and more efficient.</p>
+                <p>With years of experience in the industry, we understand what our users need and strive to deliver exceptional service.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <div class="section-content">
+                <h2>Our Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <h3>User-Friendly Interface</h3>
+                        <p>Intuitive and responsive design that makes navigation effortless for all users.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Advanced Security</h3>
+                        <p>Enterprise-grade security with end-to-end encryption to protect your data.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Lightning Fast</h3>
+                        <p>Optimized performance ensuring quick response times and smooth operations.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Real-time Analytics</h3>
+                        <p>Comprehensive insights and performance metrics at your fingertips.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>Mobile Responsive</h3>
+                        <p>Seamless experience across all devices - desktop, tablet, and mobile.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>24/7 Support</h3>
+                        <p>Round-the-clock customer support to assist you whenever needed.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <div class="section-content">
+                <h2>Contact Us</h2>
+                <div class="contact-form-container">
+                    <div id="contactSuccess" class="success-message" style="display: none;">
+                        Your message has been sent successfully. We will get back to you soon.
+                    </div>
+                    <div id="contactError" class="error-message" style="display: none;">
+                        An error occurred while submitting your message. Please try again.
+                    </div>
+                    <form id="contactForm" class="contact-form">
+                        <input type="text" name="name" id="contactName" placeholder="Your Name" required>
+                        <input type="email" name="email" id="contactEmail" placeholder="Your Email" required>
+                        <textarea name="message" id="contactMessage" placeholder="Your Message" required></textarea>
+                        <button type="submit" id="contactSubmit">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Check if user is logged in
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/user');
+                const data = await response.json();
+                
+                const authButtons = document.getElementById('authButtons');
+                const userProfile = document.getElementById('userProfile');
+                const userName = document.getElementById('userName');
+                const testButtonContainer = document.getElementById('testButtonContainer');
+                const loginPrompt = document.getElementById('loginPrompt');
+
+                if (data.isLoggedIn) {
+                    // If user is logged in and on the home page, redirect to test
+                    if (window.location.pathname === '/' && !document.referrer.includes('/test')) {
+                        window.location.href = '/test';
+                        return;
+                    }
+                    authButtons.style.display = 'none';
+                    userProfile.style.display = 'flex';
+                    userName.textContent = data.user.username;
+                    testButtonContainer.style.display = 'block';
+                    loginPrompt.style.display = 'none';
+                } else {
+                    authButtons.style.display = 'flex';
+                    userProfile.style.display = 'none';
+                    testButtonContainer.style.display = 'none';
+                    loginPrompt.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/auth/logout');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
+        // Check login status when page loads
+        checkLoginStatus();
+
+        // Handle contact form submission
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+            const submitButton = document.getElementById('contactSubmit');
+            const successMessage = document.getElementById('contactSuccess');
+            const errorMessage = document.getElementById('contactError');
+            
+            // Disable submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, message })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                    
+                    // Reset form
+                    document.getElementById('contactForm').reset();
+                } else {
+                    // Show error message
+                    successMessage.style.display = 'none';
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = data.message || 'An error occurred. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error submitting contact form:', error);
+                successMessage.style.display = 'none';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Send Message';
+            }
+        });
+    </script>
+</body>
+</html> 

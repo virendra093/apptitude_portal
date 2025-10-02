@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .admin-dashboard {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-title {
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .logout-btn {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .results-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .results-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .score-high {
+            color: #28a745;
+        }
+        
+        .score-medium {
+            color: #ffc107;
+        }
+        
+        .score-low {
+            color: #dc3545;
+        }
+        
+        .filters {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .change-password-btn {
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .change-password-btn:hover {
+            background-color: #218838;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-dashboard">
+        <div class="admin-header">
+            <h1 class="admin-title">Test Results Dashboard</h1>
+            <div class="admin-actions">
+                <a href="/admin/questions" class="change-password-btn">Manage Questions</a>
+                <a href="/admin/timing-analysis" class="change-password-btn">Timing Analysis</a>
+                <a href="/admin/suspicious-analysis" class="change-password-btn">Suspicious Analysis</a>
+                <button class="change-password-btn" onclick="showChangePasswordModal()">Change Password</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>Sort By:</label>
+                <select id="sortBy">
+                    <option value="score">Score</option>
+                    <option value="date">Date</option>
+                    <option value="username">Username</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Order:</label>
+                <select id="sortOrder">
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                </select>
+            </div>
+        </div>
+        
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Total Questions</th>
+                    <th>Correct Answers</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                    <th>Time Taken</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+                <!-- Results will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Change Password</h2>
+            <div id="passwordError" class="error-message" style="display: none;"></div>
+            <div id="passwordSuccess" class="success-message" style="display: none;"></div>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <input type="password" name="currentPassword" placeholder="Current Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="newPassword" placeholder="New Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="confirmPassword" placeholder="Confirm New Password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="submit-btn">Change Password</button>
+                    <button type="button" class="cancel-btn" onclick="hideChangePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function loadResults() {
+            try {
+                const sortBy = document.getElementById('sortBy').value;
+                const sortOrder = document.getElementById('sortOrder').value;
+                
+                const response = await fetch(`/admin/results?sortBy=${sortBy}&sortOrder=${sortOrder}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('resultsBody');
+                    tbody.innerHTML = '';
+                    
+                    // Add ranking to results
+                    const rankedResults = data.results.map((result, index) => ({
+                        ...result,
+                        rank: index + 1
+                    }));
+                    
+                    rankedResults.forEach(result => {
+                        const row = document.createElement('tr');
+                        
+                        // Format score to 2 decimal places
+                        const score = parseFloat(result.score).toFixed(2);
+                        
+                        // Determine score class for styling
+                        let scoreClass = '';
+                        if (score >= 80) {
+                            scoreClass = 'score-high';
+                        } else if (score >= 60) {
+                            scoreClass = 'score-medium';
+                        } else {
+                            scoreClass = 'score-low';
+                        }
+                        
+                        // Format date
+                        const date = new Date(result.date).toLocaleString();
+                        
+                        // Format time taken (convert from seconds to minutes and seconds)
+                        const minutes = Math.floor(result.time_taken / 60);
+                        const seconds = result.time_taken % 60;
+                        const timeTaken = `${minutes}m ${seconds}s`;
+                        
+                        row.innerHTML = `
+                            <td>${result.rank}</td>
+                            <td>${result.username}</td>
+                            <td>${result.total_questions}</td>
+                            <td>${result.correct_answers}</td>
+                            <td class="${scoreClass}">${score}%</td>
+                            <td>${date}</td>
+                            <td>${timeTaken}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    console.error('Failed to load results:', data.message);
+                }
+            } catch (error) {
+                console.error('Error loading results:', error);
+            }
+        }
+
+        // Load results when page loads
+        document.addEventListener('DOMContentLoaded', loadResults);
+
+        // Reload results when sort options change
+        document.getElementById('sortBy').addEventListener('change', loadResults);
+        document.getElementById('sortOrder').addEventListener('change', loadResults);
+
+        // Logout function
+        function logout() {
+            fetch('/admin/logout', { method: 'POST' })
+                .then(() => window.location.href = '/admin/login')
+                .catch(error => console.error('Error during logout:', error));
+        }
+
+        // Change password modal functions
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        }
+
+        function hideChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('passwordError').style.display = 'none';
+            document.getElementById('passwordSuccess').style.display = 'none';
+        }
+
+        // Handle password change form submission
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const currentPassword = formData.get('currentPassword');
+            const newPassword = formData.get('newPassword');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            // Reset error and success messages
+            const errorElement = document.getElementById('passwordError');
+            const successElement = document.getElementById('passwordSuccess');
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+            
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                errorElement.textContent = 'New passwords do not match';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        currentPassword,
+                        newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successElement.textContent = 'Password changed successfully';
+                    successElement.style.display = 'block';
+                    setTimeout(hideChangePasswordModal, 2000);
+                } else {
+                    errorElement.textContent = data.message;
+                    errorElement.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                errorElement.textContent = 'An error occurred while changing password';
+                errorElement.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html> 
